@@ -18,16 +18,21 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    python3 -m pip install --upgrade pip
-                    pip3 install -r app/requirements.txt
-                    pip3 install pytest
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r app/requirements.txt
+                    pip install pytest
                 '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'python3 -m pytest'
+                sh '''
+                    . venv/bin/activate
+                    python -m pytest
+                '''
             }
         }
 
