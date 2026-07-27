@@ -1,0 +1,13 @@
+replicaCount: 2
+
+image:
+  repository: srinivasps/devops-platform
+  tag: v1
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
+
+namespace: devops-platform
