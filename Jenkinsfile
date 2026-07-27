@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = "srinivasps/devops-platform"
-        IMAGE_TAG  = "latest"
+        IMAGE_TAG = "v1"
+        K8S_NAMESPACE = "devops-platform"
     }
 
     stages {
@@ -59,18 +60,37 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKER_USERNAME',
-                    passwordVariable: 'DOCKER_PASSWORD'
-                )]) {
-
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
+
                         docker logout
                     '''
                 }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl apply -f kubernetes/namespace.yaml
+                    kubectl apply -f kubernetes/deployment.yaml
+                    kubectl apply -f kubernetes/service.yaml
+
+                    kubectl rollout restart deployment/devops-platform -n ${K8S_NAMESPACE}
+
+                    kubectl rollout status deployment/devops-platform -n ${K8S_NAMESPACE}
+
+                    kubectl get pods -n ${K8S_NAMESPACE}
+                '''
             }
         }
     }
@@ -78,16 +98,16 @@ pipeline {
     post {
 
         success {
-            echo '====================================='
+            echo '========================================='
             echo 'Pipeline completed successfully!'
-            echo 'Docker image pushed to Docker Hub.'
-            echo '====================================='
+            echo 'Application deployed to Kubernetes.'
+            echo '========================================='
         }
 
         failure {
-            echo '====================================='
+            echo '========================================='
             echo 'Pipeline failed.'
-            echo '====================================='
+            echo '========================================='
         }
 
         always {
