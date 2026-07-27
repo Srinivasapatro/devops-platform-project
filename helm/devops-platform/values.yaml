@@ -2,7 +2,7 @@ replicaCount: 2
 
 image:
   repository: srinivasps/devops-platform
-  tag: v1
+  tag: v3
   pullPolicy: Always
 
 service:
