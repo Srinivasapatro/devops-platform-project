@@ -1,291 +1,190 @@
 # DevOps Platform Project
 
-A complete end-to-end DevOps project demonstrating CI/CD, Docker, Kubernetes, Jenkins, Prometheus, Grafana, Helm, and Terraform.
-
----
+A production-style DevOps project demonstrating a complete CI/CD pipeline using Jenkins, Docker, Kubernetes, Prometheus, Grafana, and Helm.
 
 ## Project Overview
 
-This project demonstrates a modern DevOps workflow from source code to production deployment.
+This project automates the complete software delivery lifecycle.
 
-The application is a Python Flask REST API that is automatically built, tested, containerized, pushed to Docker Hub, and deployed to Kubernetes using Jenkins.
+The pipeline performs:
 
-The application is monitored using Prometheus and Grafana.
-
----
-
-## Features
-
-- Python Flask REST API
-- Docker containerization
-- Kubernetes deployment
-- Jenkins CI/CD Pipeline
-- Automatic Docker image versioning
-- Docker Hub integration
-- Kubernetes rolling deployment
-- Prometheus monitoring
-- Grafana dashboards
-- Pytest unit testing
-- Helm chart support
-- Terraform project structure
+- Source Code Management with Git & GitHub
+- Continuous Integration using Jenkins
+- Automated Testing using Pytest
+- Docker Image Build
+- Docker Hub Image Publishing
+- Kubernetes Deployment
+- Prometheus Metrics Collection
+- Grafana Monitoring Dashboard
 
 ---
 
-## Technologies Used
+## Technology Stack
 
-| Technology | Purpose |
-|------------|---------|
-| Python | Backend Application |
-| Flask | REST API |
-| Docker | Containerization |
-| Jenkins | CI/CD Pipeline |
-| Docker Hub | Image Registry |
-| Kubernetes | Container Orchestration |
-| Prometheus | Metrics Collection |
-| Grafana | Visualization |
-| Helm | Kubernetes Package Manager |
-| Terraform | Infrastructure as Code |
-| Git | Version Control |
-| GitHub | Source Code Repository |
+| Category | Technology |
+|-----------|------------|
+| Language | Python (Flask) |
+| Containerization | Docker |
+| CI/CD | Jenkins |
+| Container Registry | Docker Hub |
+| Orchestration | Kubernetes |
+| Package Management | Helm |
+| Monitoring | Prometheus |
+| Visualization | Grafana |
+| Testing | Pytest |
+| Version Control | Git & GitHub |
 
 ---
+## Architecture
 
-## Project Architecture
-
+```text
+                    GitHub
+                       │
+                  Git Push
+                       │
+                       ▼
+                   Jenkins CI
+                       │
+         ┌─────────────┴──────────────┐
+         │                            │
+         ▼                            ▼
+     Run Tests                 Build Docker Image
+         │                            │
+         └─────────────┬──────────────┘
+                       ▼
+             Push Image to Docker Hub
+                       │
+                       ▼
+                 Helm Deployment
+                       │
+                       ▼
+               Kubernetes Cluster
+                       │
+        ┌──────────────┴─────────────┐
+        │                            │
+        ▼                            ▼
+   Flask Application             Service
+        │
+        ▼
+ Prometheus Metrics (/metrics)
+        │
+        ▼
+     Prometheus Server
+        │
+        ▼
+        Grafana Dashboard
 ```
-                    Developer
-                        │
-                        ▼
-                 GitHub Repository
-                        │
-                        ▼
-                Jenkins CI/CD Pipeline
-        ┌───────────────┼────────────────┐
-        ▼               ▼                ▼
-   Run Unit Tests   Build Docker    Version Docker Image
-                            │
-                            ▼
-                    Push Docker Hub
-                            │
-                            ▼
-                  Kubernetes Deployment
-                            │
-                            ▼
-                    Flask Application
-                            │
-             ┌──────────────┴──────────────┐
-             ▼                             ▼
-        Prometheus                    Grafana
-```
+## Project Structure
 
----
-
-## Project Workflow
-
-1. Developer pushes code to GitHub.
-
-2. Jenkins automatically starts the pipeline.
-
-3. Jenkins performs:
-
-- Checkout source code
-- Install dependencies
-- Run unit tests
-- Build Docker image
-- Push image to Docker Hub
-- Update Kubernetes deployment
-- Deploy latest version
-- Verify rollout
-
-4. Prometheus scrapes application metrics.
-
-5. Grafana visualizes metrics.
-
----
-
-## Folder Structure
-
-```
+```text
 devops-platform-project/
 │
 ├── app/
 │   ├── app.py
 │   ├── Dockerfile
-│   └── requirements.txt
-│
-├── kubernetes/
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   └── namespace.yaml
-│
-├── helm/
-│
-├── terraform/
+│   ├── requirements.txt
+│   └── __init__.py
 │
 ├── tests/
 │   └── test_app.py
+│
+├── kubernetes/
+│   ├── deployment.yaml
+│   ├── namespace.yaml
+│   └── service.yaml
+│
+├── helm/
 │
 ├── monitoring/
 │
 ├── screenshots/
 │
 ├── Jenkinsfile
-│
-└── README.md
+├── README.md
+└── requirements.txt
 ```
+## CI/CD Workflow
 
----
+1. Developer pushes code to GitHub.
+2. Jenkins automatically starts a new pipeline.
+3. Python dependencies are installed.
+4. Unit tests are executed.
+5. Docker image is built.
+6. Docker image is pushed to Docker Hub.
+7. Helm deployment is updated.
+8. Kubernetes performs a rolling update.
+9. Prometheus collects application metrics.
+10. Grafana displays dashboards for monitoring.
+## Features
 
-## Jenkins Pipeline
+- Automated CI/CD Pipeline
+- Docker Image Versioning
+- Kubernetes Rolling Updates
+- Helm Deployment
+- Prometheus Metrics
+- Grafana Dashboards
+- Flask REST API
+- Health Endpoint
+- Application Metrics Endpoint
+- Automated Unit Testing
+- Docker Hub Integration
+- GitHub Source Control
+## Project Screenshots
 
-The Jenkins pipeline performs the following stages:
+### Application
 
-- Checkout Source Code
-- Determine Docker Version
-- Verify Python
-- Create Virtual Environment
-- Install Dependencies
-- Run Unit Tests
-- Build Docker Image
-- Push Docker Image
-- Update Kubernetes Deployment
-- Deploy to Kubernetes
+![Application](screenshots/application-homepage.png)
 
----
+### Jenkins Pipeline
 
-## Docker Image Versioning
+![Jenkins](screenshots/jenkins-pipeline.png)
 
-Every successful Jenkins build automatically creates a new Docker image version.
+### Grafana Dashboard
 
-Example:
+![Grafana](screenshots/grafana-dashboard.png)
 
-```
-v1
-v2
-v3
-v4
-v5
-```
+### Prometheus Targets
 
-The Kubernetes deployment is automatically updated to use the latest image.
+![Prometheus](screenshots/prometheus-targets.png)
 
----
+### Kubernetes Pods
 
-## Monitoring
+![Pods](screenshots/kubernetes-pods.png)
 
-Metrics are collected using Prometheus.
+### Docker Hub
 
-Example metrics:
+![Docker Hub](screenshots/dockerhub-repository.png)
 
-- HTTP Request Count
-- HTTP Request Rate
-- Request Latency
-- Process CPU Usage
-- Process Memory Usage
+## Deployment
 
-Grafana dashboards visualize these metrics in real time.
-
----
-
-## Testing
-
-Unit testing is performed using Pytest.
-
-Run tests locally:
+### Clone Repository
 
 ```bash
-export PYTHONPATH=$(pwd)
-pytest -v
+git clone https://github.com/srinivasps/devops-platform-project.git
+cd devops-platform-project
 ```
 
----
-
-## Build Docker Image
+### Build Docker Image
 
 ```bash
 docker build -t srinivasps/devops-platform:v1 ./app
 ```
 
----
-
-## Push Docker Image
-
-```bash
-docker push srinivasps/devops-platform:v1
-```
-
----
-
-## Kubernetes Deployment
-
-Deploy application:
+### Deploy Kubernetes
 
 ```bash
 kubectl apply -f kubernetes/
 ```
 
-Check pods:
+### Verify
 
 ```bash
 kubectl get pods -n devops-platform
+kubectl get svc -n devops-platform
 ```
 
-Check deployment:
+### Port Forward
 
 ```bash
-kubectl get deployment -n devops-platform
+kubectl port-forward svc/devops-platform-service 8080:80 -n devops-platform
 ```
-
----
-
-## Monitoring Stack
-
-Port Forward Prometheus
-
-```bash
-kubectl port-forward svc/prometheus-server 9090:80 -n monitoring
-```
-
-Port Forward Grafana
-
-```bash
-kubectl port-forward svc/grafana 3000:80 -n monitoring
-```
-
----
-
-## Screenshots
-
-Screenshots are available inside the `screenshots/` directory.
-
-- Jenkins Pipeline
-- Jenkins Stage View
-- Docker Hub Repository
-- Kubernetes Pods
-- Kubernetes Deployment
-- Prometheus Targets
-- Grafana Dashboard
-- Running Application
-
----
-
-## Future Improvements
-
-- GitHub Actions Pipeline
-- SonarQube Integration
-- Trivy Image Scanning
-- ArgoCD GitOps
-- Loki Logging
-- Fluent Bit
-- Terraform Infrastructure Deployment
-
----
-
-## Author
-
-**Srinivas**
-
-DevOps Engineer
-
-GitHub:
-https://github.com/srinivasps/devops-platform-project
