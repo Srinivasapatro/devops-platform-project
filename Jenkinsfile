@@ -4,6 +4,8 @@ pipeline {
     environment {
         IMAGE_NAME = "srinivasps/devops-platform"
         K8S_NAMESPACE = "devops-platform"
+        HELM_RELEASE = "devops-platform"
+        HELM_CHART = "./helm/devops-platform"
     }
 
     stages {
@@ -17,51 +19,11 @@ pipeline {
         stage('Determine Image Version') {
             steps {
                 script {
-
-                    def lastTag = sh(
-                        script: '''
-                        git fetch --tags
-                        git tag | grep '^v[0-9]*$' | sort -V | tail -1 || true
-                        ''',
-                        returnStdout: true
-                    ).trim()
-
-                    if (lastTag == "") {
-                        env.IMAGE_TAG = "v1"
-                    } else {
-                        def version = lastTag.replace("v","").toInteger() + 1
-                        env.IMAGE_TAG = "v${version}"
-                    }
-
-                    echo "New Docker Tag = ${env.IMAGE_TAG}"
+                    env.IMAGE_TAG = "v${env.BUILD_NUMBER}"
+                    echo "=================================="
+                    echo "Docker Image Tag: ${env.IMAGE_TAG}"
+                    echo "=================================="
                 }
-            }
-        }
-
-        stage('Debug Workspace') {
-            steps {
-                sh '''
-                pwd
-
-                echo "========================="
-                ls -la
-                echo "========================="
-
-                ls -la app
-
-                echo "========================="
-                python3 -c "
-import os
-import sys
-
-print('PWD =', os.getcwd())
-print('PYTHONPATH =', os.getenv('PYTHONPATH'))
-print('sys.path =')
-
-for p in sys.path:
-    print(p)
-"
-                '''
             }
         }
 
@@ -76,7 +38,6 @@ for p in sys.path:
                 sh '''
                 python3 -m venv venv
                 . venv/bin/activate
-
                 python -m pip install --upgrade pip
                 '''
             }
@@ -98,9 +59,9 @@ for p in sys.path:
                 sh '''
                 . venv/bin/activate
 
-                export PYTHONPATH=$(pwd)
+                export PYTHONPATH=$WORKSPACE
 
-                python -m pytest -v
+                pytest -v
                 '''
             }
         }
@@ -109,8 +70,8 @@ for p in sys.path:
             steps {
                 sh '''
                 docker build \
-                -t ${IMAGE_NAME}:${IMAGE_TAG} \
-                ./app
+                    -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                    ./app
                 '''
             }
         }
@@ -127,8 +88,8 @@ for p in sys.path:
 
                     sh '''
                     echo "$DOCKER_PASSWORD" | docker login \
-                    -u "$DOCKER_USERNAME" \
-                    --password-stdin
+                        -u "$DOCKER_USERNAME" \
+                        --password-stdin
 
                     docker push ${IMAGE_NAME}:${IMAGE_TAG}
 
@@ -141,9 +102,13 @@ for p in sys.path:
         stage('Update Helm Values') {
             steps {
                 sh '''
-                sed -i "s/tag:.*/tag: ${IMAGE_TAG}/" \
-                helm/devops-platform/values.yaml
+                sed -i "s|repository:.*|repository: ${IMAGE_NAME}|" \
+                    helm/devops-platform/values.yaml
 
+                sed -i "s|tag:.*|tag: ${IMAGE_TAG}|" \
+                    helm/devops-platform/values.yaml
+
+                echo "========== values.yaml =========="
                 cat helm/devops-platform/values.yaml
                 '''
             }
@@ -152,48 +117,18 @@ for p in sys.path:
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
+                kubectl apply -f kubernetes/namespace.yaml
+
                 helm upgrade --install \
-                devops-platform \
-                ./helm/devops-platform \
-                -n ${K8S_NAMESPACE} \
-                --create-namespace
+                    ${HELM_RELEASE} \
+                    ${HELM_CHART} \
+                    -n ${K8S_NAMESPACE}
 
                 kubectl rollout status deployment/devops-platform \
-                -n ${K8S_NAMESPACE}
+                    -n ${K8S_NAMESPACE}
+
+                kubectl get pods -n ${K8S_NAMESPACE}
                 '''
-            }
-        }
-
-        stage('Create Git Tag') {
-
-            steps {
-
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'github-creds',
-                        usernameVariable: 'GIT_USERNAME',
-                        passwordVariable: 'GIT_PASSWORD'
-                    )
-                ]) {
-
-                    sh '''
-
-                    git config user.email "jenkins@local"
-
-                    git config user.name "Jenkins"
-
-                    git add helm/devops-platform/values.yaml
-
-                    git commit -m "Release ${IMAGE_TAG}" || true
-
-                    git tag ${IMAGE_TAG}
-
-                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/srinivasps/devops-platform-project.git HEAD:main
-
-                    git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/srinivasps/devops-platform-project.git ${IMAGE_TAG}
-
-                    '''
-                }
             }
         }
     }
@@ -202,19 +137,23 @@ for p in sys.path:
 
         success {
 
-            echo "======================================"
+            echo ""
+            echo "========================================="
             echo "Build Successful"
             echo "Docker Image : ${IMAGE_NAME}:${IMAGE_TAG}"
-            echo "======================================"
-
-            cleanWs()
+            echo "Namespace    : ${K8S_NAMESPACE}"
+            echo "========================================="
         }
 
         failure {
 
-            echo "======================================"
+            echo ""
+            echo "========================================="
             echo "Build Failed"
-            echo "======================================"
+            echo "========================================="
+        }
+
+        always {
 
             cleanWs()
         }
