@@ -188,3 +188,78 @@ kubectl get svc -n devops-platform
 ```bash
 kubectl port-forward svc/devops-platform-service 8080:80 -n devops-platform
 ```
+## Key Achievements
+
+- Designed and implemented an end-to-end DevOps CI/CD pipeline.
+- Automated Docker image build and deployment using Jenkins.
+- Deployed a Flask application on Kubernetes.
+- Implemented rolling updates with zero downtime.
+- Integrated Prometheus for application monitoring.
+- Built Grafana dashboards for real-time visualization.
+- Added automated unit testing using Pytest.
+- Implemented Docker image versioning.
+- Managed Kubernetes resources using Helm.
+
+## API Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/` | Application Information |
+| `/health` | Health Check |
+| `/metrics` | Prometheus Metrics |
+
+## Monitoring
+
+The project includes:
+
+- Prometheus for metrics collection
+- Grafana for dashboards
+- Custom Flask application metrics
+- Request count monitoring
+- Request latency monitoring
+
+## Jenkins Pipeline
+
+The Jenkins pipeline performs the following stages:
+
+1. Checkout Source Code
+2. Determine Docker Version
+3. Install Dependencies
+4. Run Unit Tests
+5. Build Docker Image
+6. Push Docker Image
+7. Update Helm Chart
+8. Deploy to Kubernetes
+9. Create Git Tag
+
+## Skills Demonstrated
+
+- Jenkins Pipeline
+- Docker
+- Docker Hub
+- Kubernetes
+- Helm
+- Prometheus
+- Grafana
+- Git
+- GitHub
+- Linux
+- Python
+- Flask
+- Pytest
+- YAML
+- CI/CD
+- Monitoring
+- Containerization
+- Infrastructure Automation
+
+## Future Improvements
+
+- GitHub Actions Pipeline
+- ArgoCD GitOps Deployment
+- Terraform Infrastructure Automation
+- SonarQube Code Quality Analysis
+- Trivy Image Scanning
+- Horizontal Pod Autoscaler
+- Kubernetes Ingress
+
